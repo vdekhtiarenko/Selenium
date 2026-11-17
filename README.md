@@ -15,17 +15,15 @@ docker compose logs -f youtrack
 
 ## Настройка и запуск тестов
 
-Укажите URL, учётные данные пользователя с правами на создание задач и ключ существующего проекта:
+Заполните локальный файл `.env`: укажите логин и пароль пользователя с правами на создание задач. Файл `.env` исключён из Git. Шаблон для других разработчиков хранится в `.env.example`.
+
+После этого запустите тесты из корня проекта:
 
 ```powershell
-$env:YOUTRACK_URL = "http://localhost:8080"
-$env:YOUTRACK_USERNAME = "ваш_логин"
-$env:YOUTRACK_PASSWORD = "ваш_пароль"
-$env:YOUTRACK_PROJECT = "TEST"
 mvn test
 ```
 
-Те же параметры можно передать как Maven properties: `mvn test -Dyoutrack.url=http://localhost:8080 -Dyoutrack.username=... -Dyoutrack.password=... -Dyoutrack.project=TEST`. Для видимого окна Chrome укажите `-Dbrowser.headless=false`; по умолчанию Chrome запускается в headless-режиме.
+Значения из `.env` можно переопределить переменными окружения или Maven properties. Для видимого окна Chrome укажите `-Dbrowser.headless=false`; по умолчанию Chrome запускается в headless-режиме.
 
 Требуются JDK 17+, Maven и Google Chrome. Параллельное выполнение тестов JUnit включено в `junit-platform.properties`. Токен YouTrack для этих UI-сценариев не требуется.
 

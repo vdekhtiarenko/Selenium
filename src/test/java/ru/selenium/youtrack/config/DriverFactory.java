@@ -13,7 +13,7 @@ public final class DriverFactory {
     public static WebDriver create() {
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--window-size=1440,1000", "--disable-notifications");
-        if (Boolean.parseBoolean(System.getProperty("browser.headless", "true"))) {
+        if (Boolean.parseBoolean(TestEnvironment.get("browser.headless", "BROWSER_HEADLESS", "true"))) {
             options.addArguments("--headless=new");
         }
         WebDriver driver = new ChromeDriver(options);

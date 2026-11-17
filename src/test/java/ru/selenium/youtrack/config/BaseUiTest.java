@@ -20,26 +20,18 @@ public abstract class BaseUiTest {
     }
 
     protected String baseUrl() {
-        return setting("youtrack.url", "YOUTRACK_URL", "http://localhost:8080");
+        return TestEnvironment.get("youtrack.url", "YOUTRACK_URL", "http://localhost:8080");
     }
 
     protected String username() {
-        return setting("youtrack.username", "YOUTRACK_USERNAME", "");
+        return TestEnvironment.get("youtrack.username", "YOUTRACK_USERNAME", "");
     }
 
     protected String password() {
-        return setting("youtrack.password", "YOUTRACK_PASSWORD", "");
+        return TestEnvironment.get("youtrack.password", "YOUTRACK_PASSWORD", "");
     }
 
     protected String projectKey() {
-        return setting("youtrack.project", "YOUTRACK_PROJECT", "TEST");
-    }
-
-    private String setting(String property, String environmentVariable, String defaultValue) {
-        String value = System.getProperty(property);
-        if (value == null || value.isBlank()) {
-            value = System.getenv(environmentVariable);
-        }
-        return value == null || value.isBlank() ? defaultValue : value;
+        return TestEnvironment.get("youtrack.project", "YOUTRACK_PROJECT", "TEST");
     }
 }

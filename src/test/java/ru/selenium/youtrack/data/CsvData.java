@@ -1,5 +1,7 @@
 package ru.selenium.youtrack.data;
 
+import ru.selenium.youtrack.config.TestEnvironment;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,9 +35,7 @@ public final class CsvData {
     private static String expandEnvironmentVariable(String value) {
         if (value.startsWith("${") && value.endsWith("}")) {
             String variable = value.substring(2, value.length() - 1);
-            String resolved = System.getProperty(variable.toLowerCase().replace('_', '.'));
-            if (resolved == null || resolved.isBlank()) resolved = System.getenv(variable);
-            return resolved == null ? "" : resolved;
+            return TestEnvironment.getEnvironmentValue(variable);
         }
         return value;
     }
