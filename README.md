@@ -15,15 +15,35 @@ docker compose logs -f youtrack
 
 ## Настройка и запуск тестов
 
-Заполните локальный файл `.env`: укажите логин и пароль пользователя с правами на создание задач. Файл `.env` исключён из Git. Шаблон для других разработчиков хранится в `.env.example`.
+Заполните локальный файл `.env`: укажите логин и пароль пользователя с правами на создание задач. Файл `.env` исключён из Git. Шаблон для других разработчиков хранится в `.env.example`. Файл необязателен: если он отсутствует или нужное значение в нём пустое, тесты возьмут значение из системной переменной окружения.
 
-После этого запустите тесты из корня проекта:
+Порядок поиска значения: Maven/Java property (`-Dyoutrack.username=...`), системная переменная (`YOUTRACK_USERNAME`), значение из `.env`, затем значение по умолчанию, если оно задано. Запускайте Maven из корня проекта, где лежит `.env`:
 
 ```powershell
 mvn test
 ```
 
-Значения из `.env` можно переопределить переменными окружения или Maven properties. Для видимого окна Chrome укажите `-Dbrowser.headless=false`; по умолчанию Chrome запускается в headless-режиме.
+Вместо `.env` можно задать переменные в PowerShell перед запуском:
+
+```powershell
+$env:YOUTRACK_URL = "http://localhost:8080"
+$env:YOUTRACK_USERNAME = "ваш_логин"
+$env:YOUTRACK_PASSWORD = "ваш_пароль"
+$env:YOUTRACK_PROJECT = "DEMO"
+mvn test
+```
+
+На macOS/Linux используйте `export` в терминале:
+
+```sh
+export YOUTRACK_URL="http://localhost:8080"
+export YOUTRACK_USERNAME="ваш_логин"
+export YOUTRACK_PASSWORD="ваш_пароль"
+export YOUTRACK_PROJECT="DEMO"
+mvn test
+```
+
+Переменные, заданные в терминале, действуют для Maven, запущенного из этого терминала. Для видимого окна Chrome укажите `-Dbrowser.headless=false`; по умолчанию Chrome запускается в headless-режиме.
 
 Требуются JDK 17+, Maven и Google Chrome. Параллельное выполнение тестов JUnit включено в `junit-platform.properties`. Токен YouTrack для этих UI-сценариев не требуется.
 
