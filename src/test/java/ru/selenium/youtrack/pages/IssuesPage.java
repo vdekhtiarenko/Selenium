@@ -24,30 +24,25 @@ public class IssuesPage {
     }
 
     public void createIssue(String projectKey, String summary, String description) {
-        clickFirst(By.cssSelector("button[aria-label='New issue']"),
-                By.xpath("//button[contains(normalize-space(.), 'New issue') or contains(normalize-space(.), 'Create issue')]") );
+        clickFirst(By.cssSelector("a[data-test='createIssueButton']"));
 
-        WebElement project = findFirst(By.cssSelector("input[placeholder*='Project'], input[aria-label*='Project']"),
-                By.xpath("//input[contains(@placeholder, 'Project') or contains(@aria-label, 'Project')]"));
-        project.sendKeys(projectKey);
-        project.sendKeys(Keys.ENTER);
+        // The issue list context already selects the target project.
 
-        WebElement title = findFirst(By.cssSelector("input[placeholder='Summary'], input[aria-label='Summary'], input[name='summary']"),
-                By.xpath("//input[contains(@placeholder, 'Summary') or contains(@aria-label, 'Summary')]"));
+        WebElement title = findFirst(By.cssSelector("textarea[data-test='summary']"));
         title.sendKeys(summary);
-        driver.findElements(By.cssSelector("textarea[placeholder*='Description'], textarea[aria-label*='Description']"))
+        driver.findElements(By.cssSelector("[data-test='wysiwyg-editor-content'][contenteditable='true']"))
                 .stream().findFirst().ifPresent(element -> element.sendKeys(description));
 
-        clickFirst(By.cssSelector("button[type='submit']"),
+        clickFirst(By.cssSelector("button[data-test='submit-button']"),
                 By.xpath("//button[contains(normalize-space(.), 'Create') or contains(normalize-space(.), 'Submit')]") );
         wait.until(ExpectedConditions.or(
                 ExpectedConditions.urlContains(projectKey + "-"),
-                ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("input[placeholder='Summary'], input[aria-label='Summary']"))));
+                ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("textarea[data-test='summary']"))));
     }
 
     public void search(String query) {
         WebElement search = findFirst(
-                By.cssSelector("input[placeholder*='Search issues'], input[aria-label*='Search issues'], input[data-test='issue-search']"),
+                By.cssSelector("input[placeholder='Search for text or add a filter']"),
                 By.xpath("//input[contains(@placeholder, 'Search') or contains(@aria-label, 'Search')]") );
         search.clear();
         search.sendKeys(query, Keys.ENTER);
@@ -63,11 +58,14 @@ public class IssuesPage {
     }
 
     private WebElement findFirst(By... selectors) {
-        for (By selector : selectors) {
-            var matches = driver.findElements(selector);
-            if (!matches.isEmpty()) return wait.until(ExpectedConditions.elementToBeClickable(matches.get(0)));
-        }
-        return wait.until(ExpectedConditions.elementToBeClickable(selectors[0]));
+        return wait.until(currentDriver -> {
+            for (By selector : selectors) {
+                for (WebElement element : currentDriver.findElements(selector)) {
+                    if (element.isDisplayed() && element.isEnabled()) return element;
+                }
+            }
+            return null;
+        });
     }
 
     private void clickFirst(By... selectors) {

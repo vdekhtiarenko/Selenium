@@ -44,7 +44,7 @@ class YouTrackUiTest extends BaseUiTest {
         signIn();
         HomePage home = new HomePage(driver);
         home.openProjects(baseUrl());
-        Assertions.assertTrue(home.containsProject(projectKey()),
+        Assertions.assertTrue(home.containsProject("Demo project"),
                 "В списке проектов должен присутствовать проект " + projectKey());
     }
 

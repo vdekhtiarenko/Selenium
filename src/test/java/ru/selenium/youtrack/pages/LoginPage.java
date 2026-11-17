@@ -23,19 +23,21 @@ public class LoginPage {
     }
 
     public void login(String username, String password) {
-        input(By.id("id_l.UserLogin"), By.name("username"), By.cssSelector("input[autocomplete='username']"))
+        input(By.cssSelector("input[placeholder='Username or Email']"),
+                By.name("username"), By.cssSelector("input[autocomplete='username']"))
                 .sendKeys(username);
-        input(By.id("id_l.Password"), By.name("password"), By.cssSelector("input[type='password']"))
+        input(By.cssSelector("input[placeholder='Password']"),
+                By.name("password"), By.cssSelector("input[type='password']"))
                 .sendKeys(password);
         WebElement submit = wait.until(ExpectedConditions.elementToBeClickable(
-                By.cssSelector("button[type='submit'], input[type='submit'], #id_l\\.Login")));
+                By.xpath("//button[normalize-space()='Log in'] | //input[@type='submit']")));
         submit.click();
     }
 
     public boolean hasLoginError() {
         try {
-            return wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(
-                    ".login-error, [data-test='login-error'], [role='alert']"))).isDisplayed();
+            return wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(
+                    "//*[contains(normalize-space(.), 'Incorrect username or password')]"))).isDisplayed();
         } catch (org.openqa.selenium.TimeoutException ignored) {
             return false;
         }

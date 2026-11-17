@@ -1,6 +1,7 @@
 package ru.selenium.youtrack.pages;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -18,11 +19,9 @@ public class HomePage {
 
     public boolean isLoaded() {
         try {
-            wait.until(ExpectedConditions.or(
-                    ExpectedConditions.urlContains("/dashboard"),
-                    ExpectedConditions.presenceOfElementLocated(By.cssSelector("[data-test='global-nav'], nav")),
-                    ExpectedConditions.titleContains("YouTrack")));
-            return !driver.getCurrentUrl().contains("/login");
+            return wait.until(currentDriver -> ((String) ((JavascriptExecutor) currentDriver)
+                    .executeScript("return document.body ? document.body.innerText : ''"))
+                    .contains("Issues"));
         } catch (org.openqa.selenium.TimeoutException ignored) {
             return false;
         }
