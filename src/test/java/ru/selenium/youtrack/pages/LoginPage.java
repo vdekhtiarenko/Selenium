@@ -2,19 +2,15 @@ package ru.selenium.youtrack.pages;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
-
-public class LoginPage {
-    private final WebDriver driver;
-    private final WebDriverWait wait;
+public class LoginPage extends BasePage {
+    private static final By USERNAME = By.xpath("//input[@placeholder='Username or Email' or @name='username' or @autocomplete='username']");
+    private static final By PASSWORD = By.xpath("//input[@placeholder='Password' or @name='password' or @type='password']");
+    private static final By SUBMIT = By.xpath("//button[normalize-space()='Log in'] | //input[@type='submit']");
+    private static final By LOGIN_ERROR = By.xpath("//*[contains(normalize-space(.), 'Incorrect username or password')]");
 
     public LoginPage(WebDriver driver) {
-        this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(25));
+        super(driver);
     }
 
     public LoginPage open(String baseUrl) {
@@ -23,33 +19,16 @@ public class LoginPage {
     }
 
     public void login(String username, String password) {
-        input(By.cssSelector("input[placeholder='Username or Email']"),
-                By.name("username"), By.cssSelector("input[autocomplete='username']"))
-                .sendKeys(username);
-        input(By.cssSelector("input[placeholder='Password']"),
-                By.name("password"), By.cssSelector("input[type='password']"))
-                .sendKeys(password);
-        WebElement submit = wait.until(ExpectedConditions.elementToBeClickable(
-                By.xpath("//button[normalize-space()='Log in'] | //input[@type='submit']")));
-        submit.click();
+        visible(USERNAME).sendKeys(username);
+        visible(PASSWORD).sendKeys(password);
+        clickable(SUBMIT).click();
     }
 
     public boolean hasLoginError() {
         try {
-            return wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(
-                    "//*[contains(normalize-space(.), 'Incorrect username or password')]"))).isDisplayed();
+            return visible(LOGIN_ERROR).isDisplayed();
         } catch (org.openqa.selenium.TimeoutException ignored) {
             return false;
         }
-    }
-
-    private WebElement input(By... selectors) {
-        for (By selector : selectors) {
-            var matches = driver.findElements(selector);
-            if (!matches.isEmpty()) {
-                return wait.until(ExpectedConditions.visibilityOf(matches.get(0)));
-            }
-        }
-        return wait.until(ExpectedConditions.visibilityOfElementLocated(selectors[0]));
     }
 }

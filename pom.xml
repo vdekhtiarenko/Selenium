@@ -9,7 +9,7 @@
     <properties>
         <maven.compiler.release>17</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <selenium.version>4.27.0</selenium.version>
+        <selenium.version>4.53.0</selenium.version>
         <junit.version>5.11.4</junit.version>
         <youtrack.url></youtrack.url>
         <youtrack.username></youtrack.username>
@@ -54,6 +54,28 @@
                         <browser.headless>${browser.headless}</browser.headless>
                     </systemPropertyVariables>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>default-test</id>
+                        <configuration>
+                            <includes>
+                                <include>**/PreflightUiTest.java</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>remaining-ui-tests</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/PreflightUiTest.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

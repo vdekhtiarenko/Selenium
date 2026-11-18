@@ -4,17 +4,13 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
-
-public class HomePage {
-    private final WebDriver driver;
-    private final WebDriverWait wait;
+public class HomePage extends BasePage {
+    private static final By PROJECTS_CONTENT = By.xpath("//body");
+    private static final String PROJECT_NAME = "//*[self::a or self::div or self::span or self::td][contains(normalize-space(.), %s)]";
 
     public HomePage(WebDriver driver) {
-        this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(25));
+        super(driver);
     }
 
     public boolean isLoaded() {
@@ -29,22 +25,14 @@ public class HomePage {
 
     public void openProjects(String baseUrl) {
         driver.get(baseUrl + "/projects");
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
+        wait.until(ExpectedConditions.presenceOfElementLocated(PROJECTS_CONTENT));
     }
 
-    public boolean containsProject(String projectKey) {
+    public boolean containsProject(String projectName) {
         try {
-            return wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(
-                    "//*[self::a or self::div or self::span or self::td][contains(normalize-space(.), "
-                            + xpathLiteral(projectKey) + ")]"))).isDisplayed();
+            return visible(By.xpath(PROJECT_NAME.formatted(xpathLiteral(projectName)))).isDisplayed();
         } catch (org.openqa.selenium.TimeoutException ignored) {
             return false;
         }
-    }
-
-    private String xpathLiteral(String value) {
-        if (!value.contains("'")) return "'" + value + "'";
-        if (!value.contains("\"")) return "\"" + value + "\"";
-        return "concat('" + value.replace("'", "', \"'\", '") + "')";
     }
 }
