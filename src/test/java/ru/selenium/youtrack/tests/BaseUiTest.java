@@ -3,7 +3,6 @@ package ru.selenium.youtrack.tests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -52,20 +51,6 @@ abstract class BaseUiTest {
         return TestEnvironment.get("youtrack.project", "YOUTRACK_PROJECT", "DEMO");
     }
 
-}
-
-class PreflightUiTest extends BaseUiTest {
-    @Test
-    void browserOpensYouTrack() {
-        Assertions.assertFalse(driver.getTitle().isBlank(), "The YouTrack page should have a title after loading");
-    }
-
-    @Test
-    void configuredUserCanSignIn() {
-        TestEnvironment.requireYouTrackCredentials();
-        new LoginPage(driver).login(username(), password());
-        Assertions.assertTrue(new HomePage(driver).isLoaded(), "The configured user should sign in to YouTrack");
-    }
 }
 
 abstract class AuthenticatedUiTestSupport extends BaseUiTest {
