@@ -1,5 +1,7 @@
 package ru.selenium.youtrack.config;
 
+import org.junit.jupiter.api.Assertions;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -23,6 +25,13 @@ public final class TestEnvironment {
     public static String getEnvironmentValue(String environmentVariable) {
         String systemProperty = environmentVariable.toLowerCase().replace('_', '.');
         return get(systemProperty, environmentVariable, "");
+    }
+
+    public static void requireYouTrackCredentials() {
+        Assertions.assertFalse(get("youtrack.username", "YOUTRACK_USERNAME", "").isBlank(),
+                "Set YOUTRACK_USERNAME before running authenticated UI tests");
+        Assertions.assertFalse(get("youtrack.password", "YOUTRACK_PASSWORD", "").isBlank(),
+                "Set YOUTRACK_PASSWORD before running authenticated UI tests");
     }
 
     private static Map<String, String> loadDotenv() {

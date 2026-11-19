@@ -1,20 +1,23 @@
-package ru.selenium.youtrack.config;
+package ru.selenium.youtrack.tests;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.junit.jupiter.api.Assertions;
+import ru.selenium.youtrack.config.DriverFactory;
+import ru.selenium.youtrack.config.ScreenshotExtension;
+import ru.selenium.youtrack.config.TestEnvironment;
 import ru.selenium.youtrack.pages.HomePage;
 import ru.selenium.youtrack.pages.LoginPage;
 
 import java.time.Duration;
-import java.util.UUID;
 
 @ExtendWith(ScreenshotExtension.class)
-public abstract class BaseUiTest {
+abstract class BaseUiTest {
     protected WebDriver driver;
 
     @BeforeEach
@@ -49,14 +52,27 @@ public abstract class BaseUiTest {
         return TestEnvironment.get("youtrack.project", "YOUTRACK_PROJECT", "DEMO");
     }
 
-    protected void signIn() {
-        Assertions.assertFalse(username().isBlank(), "Set YOUTRACK_USERNAME before running authenticated UI tests");
-        Assertions.assertFalse(password().isBlank(), "Set YOUTRACK_PASSWORD before running authenticated UI tests");
-        new LoginPage(driver).open(baseUrl()).login(username(), password());
-        Assertions.assertTrue(new HomePage(driver).isLoaded(), "The configured user should sign in to YouTrack");
+}
+
+class PreflightUiTest extends BaseUiTest {
+    @Test
+    void browserOpensYouTrack() {
+        Assertions.assertFalse(driver.getTitle().isBlank(), "The YouTrack page should have a title after loading");
     }
 
-    protected String uniqueSummary(String template) {
-        return template + " " + UUID.randomUUID().toString().substring(0, 8);
+    @Test
+    void configuredUserCanSignIn() {
+        TestEnvironment.requireYouTrackCredentials();
+        new LoginPage(driver).login(username(), password());
+        Assertions.assertTrue(new HomePage(driver).isLoaded(), "The configured user should sign in to YouTrack");
+    }
+}
+
+abstract class AuthenticatedUiTestSupport extends BaseUiTest {
+    @BeforeEach
+    void signInConfiguredUser() {
+        TestEnvironment.requireYouTrackCredentials();
+        new LoginPage(driver).login(username(), password());
+        Assertions.assertTrue(new HomePage(driver).isLoaded(), "The configured user should sign in to YouTrack");
     }
 }

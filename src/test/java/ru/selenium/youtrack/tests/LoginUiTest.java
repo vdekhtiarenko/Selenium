@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import ru.selenium.youtrack.config.BaseUiTest;
 import ru.selenium.youtrack.data.CsvData;
 import ru.selenium.youtrack.pages.HomePage;
 import ru.selenium.youtrack.pages.LoginPage;
