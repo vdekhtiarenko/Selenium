@@ -1,6 +1,6 @@
 # Selenium UI-тесты YouTrack Server
 
-Проект содержит UI-тесты YouTrack на Java 17, Selenium WebDriver и JUnit 5. ChromeDriver автоматически подбирается Selenium Manager. Каждый тест использует отдельный потокобезопасный экземпляр браузера. При ошибке JUnit сохраняет скриншот в `target/screenshots`; стандартные отчёты Surefire находятся в `target/surefire-reports`.
+Проект содержит UI-тесты YouTrack на Java 17, Selenium WebDriver 4.53.0 и JUnit 5. ChromeDriver автоматически подбирается Selenium Manager. Каждый тест использует отдельный потокобезопасный экземпляр браузера. При ошибке JUnit сохраняет скриншот в `target/screenshots`; стандартные отчёты Surefire находятся в `target/surefire-reports`.
 
 ## Запуск YouTrack
 
@@ -22,6 +22,8 @@ docker compose logs -f youtrack
 ```powershell
 mvn test
 ```
+
+Сначала Surefire запускает `PreflightUiTest`: он проверяет вход настроенным пользователем. Остальные UI-тесты запускаются вторым этапом только после успешного preflight. Если он падает, Maven останавливает сборку; тесты второго этапа не запускаются и не отмечаются как skipped. Остальные тесты выполняются параллельно (до двух одновременно).
 
 Вместо `.env` можно задать переменные в PowerShell перед запуском:
 
