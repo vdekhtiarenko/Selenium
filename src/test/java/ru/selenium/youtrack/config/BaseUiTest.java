@@ -3,11 +3,14 @@ package ru.selenium.youtrack.config;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.junit.jupiter.api.Assertions;
 import ru.selenium.youtrack.pages.HomePage;
 import ru.selenium.youtrack.pages.LoginPage;
 
+import java.time.Duration;
 import java.util.UUID;
 
 @ExtendWith(ScreenshotExtension.class)
@@ -17,6 +20,12 @@ public abstract class BaseUiTest {
     @BeforeEach
     void startBrowser() {
         driver = DriverFactory.create();
+        driver.get(baseUrl());
+        new WebDriverWait(driver, Duration.ofSeconds(25)).until(currentDriver ->
+                "complete".equals(((JavascriptExecutor) currentDriver)
+                        .executeScript("return document.readyState"))
+                        && (Boolean) ((JavascriptExecutor) currentDriver)
+                        .executeScript("return document.documentElement != null"));
     }
 
     @AfterEach

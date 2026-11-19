@@ -18,24 +18,13 @@ class IssueUiTest extends BaseUiTest {
 
     @ParameterizedTest(name = "Create issue: {0}")
     @MethodSource("issueCases")
-    void userCanCreateIssue(String summaryTemplate, String description) {
+    void userCanCreateAndFindIssueBySummary(String summaryTemplate, String description) {
         signIn();
         String summary = uniqueSummary(summaryTemplate);
         IssuesPage issues = new IssuesPage(driver);
         issues.open(baseUrl());
-        issues.createIssue(projectKey(), summary, description);
-        Assertions.assertTrue(issues.showsIssue(summary), "The created issue should be visible");
-    }
-
-    @ParameterizedTest(name = "Find issue: {0}")
-    @MethodSource("issueCases")
-    void userCanFindIssueBySummary(String summaryTemplate, String description) {
-        signIn();
-        String summary = uniqueSummary(summaryTemplate);
-        IssuesPage issues = new IssuesPage(driver);
-        issues.open(baseUrl());
-        issues.createIssue(projectKey(), summary, description);
-        issues.open(baseUrl());
+        issues.createIssue(summary, description);
+        issues.refresh();
         issues.search(summary);
         Assertions.assertTrue(issues.showsIssue(summary), "The issue should be found by its summary");
     }

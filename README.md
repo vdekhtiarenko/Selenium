@@ -60,3 +60,64 @@ mvn test
 | 5 | Поиск задачи | Поиск по заголовку возвращает созданную задачу |
 
 Данные входа и задачи находятся в `src/test/resources/testdata/*.csv`. Заголовки задач получают уникальный суффикс для параллельных запусков.
+
+## Jenkins в отдельном Docker-контейнере
+
+Jenkins запускается отдельно от YouTrack. Сначала поднимите YouTrack обычной командой `docker compose up -d`. Затем подготовьте локальные переменные Jenkins и запустите его:
+
+```powershell
+Copy-Item .env.jenkins.example .env.jenkins
+# Откройте .env.jenkins и укажите данные тестового пользователя YouTrack
+docker compose -f docker-compose.jenkins.yml up -d --build
+```
+
+Jenkins будет доступен по адресу `http://localhost:8081`. Из Jenkins-контейнера YouTrack доступен по адресу `http://host.docker.internal:8080`; Для остановки `docker compose -f docker-compose.jenkins.yml down`; volume сохраняется. Не добавляйте `.env.jenkins` в Git.
+
+При первом входе пароль администратора (или в консоли) для настройки:
+
+```powershell
+docker exec selenium-jenkins sh -c "cat /var/jenkins_home/secrets/initialAdminPassword"
+```
+
+В мастере первоначальной настройки установить рекомендуемые плагины. Настроить пайплайн: 
+```
+pipeline {
+    agent any
+
+    triggers {
+        cron('TZ=Europe/Moscow\n0 0 * * *')
+        pollSCM('H/5 * * * *')
+    }
+
+    options {
+        timestamps()
+        timeout(time: 30, unit: 'MINUTES')
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/vdekhtiarenko/Selenium.git'
+            }
+        }
+        stage('UI tests') {
+            steps {
+                sh 'mvn -B test'
+            }
+        }
+    }
+
+    post {
+        always {
+            junit testResults: 'target/surefire-reports/*.xml', allowEmptyResults: true
+            archiveArtifacts artifacts: 'target/screenshots/**/*', allowEmptyArchive: true
+        }
+    }
+}
+```
+
+Еще можно настроить крон или вебхук.
+
+Локальный `Jenkinsfile` подготовлен для последующего хранения pipeline в Git. После отправки `Jenkinsfile` в выбранную ветку можно переключить задачу `test` на **Pipeline script from SCM**: SCM `Git`, Repository URL `https://github.com/vdekhtiarenko/Selenium.git`, Branch Specifier `*/feat/youtrack-selenium-tests`, Script Path `Jenkinsfile`.
+
+`YOUTRACK_URL`, `YOUTRACK_USERNAME`, `YOUTRACK_PASSWORD`, `YOUTRACK_PROJECT` и `BROWSER_HEADLESS` передаются Jenkins из `.env.jenkins`. При смене пароля тестового пользователя обновить локальный файл и пересоздайть контейнер: `docker compose -f docker-compose.jenkins.yml up -d`.

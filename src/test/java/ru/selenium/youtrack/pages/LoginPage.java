@@ -4,10 +4,10 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 public class LoginPage extends BasePage {
-    private static final By USERNAME = By.xpath("//input[@placeholder='Username or Email' or @name='username' or @autocomplete='username']");
-    private static final By PASSWORD = By.xpath("//input[@placeholder='Password' or @name='password' or @type='password']");
-    private static final By SUBMIT = By.xpath("//button[normalize-space()='Log in'] | //input[@type='submit']");
-    private static final By LOGIN_ERROR = By.xpath("//*[contains(normalize-space(.), 'Incorrect username or password')]");
+    private static final By USERNAME = By.xpath("//input[@data-test='username-field']");
+    private static final By PASSWORD = By.xpath("//input[@data-test='password-field']");
+    private static final By SUBMIT = By.xpath("//button[@data-test='login-button']");
+    private static final By LOGIN_ERROR = By.xpath("//*[@data-test='error-message']//*[normalize-space(text()) = 'Incorrect username or password.']");
 
     public LoginPage(WebDriver driver) {
         super(driver);
@@ -19,8 +19,13 @@ public class LoginPage extends BasePage {
     }
 
     public void login(String username, String password) {
-        visible(USERNAME).sendKeys(username);
-        visible(PASSWORD).sendKeys(password);
+        var usernameField = visible(USERNAME);
+        usernameField.clear();
+        usernameField.sendKeys(username);
+
+        var passwordField = visible(PASSWORD);
+        passwordField.clear();
+        passwordField.sendKeys(password);
         clickable(SUBMIT).click();
     }
 

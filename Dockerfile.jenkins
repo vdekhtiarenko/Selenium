@@ -1,0 +1,9 @@
+FROM jenkins/jenkins:lts-jdk17
+
+USER root
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends maven chromium chromium-driver curl \
+    && printf '%s\n' 'CHROMIUM_FLAGS="$CHROMIUM_FLAGS --no-sandbox"' > /etc/chromium.d/jenkins-no-sandbox \
+    && rm -rf /var/lib/apt/lists/*
+
+USER jenkins
