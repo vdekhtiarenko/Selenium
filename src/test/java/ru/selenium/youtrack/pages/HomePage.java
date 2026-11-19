@@ -6,8 +6,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class HomePage extends BasePage {
-    private static final By PROJECTS_CONTENT = By.xpath("//body");
-    private static final String PROJECT_NAME = "//*[self::a or self::div or self::span or self::td][contains(normalize-space(.), %s)]";
+    private static final By PROJECTS_CONTENT = By.xpath("//*[@data-test='project-list']");
+    private static final String PROJECT_NAME = "//*[@data-test='project' and @data-test-name = %s]";
 
     public HomePage(WebDriver driver) {
         super(driver);

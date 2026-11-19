@@ -1,18 +1,33 @@
 package ru.selenium.youtrack.pages;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class IssuesPage extends BasePage {
+    private static final DateTimeFormatter SCREENSHOT_TIMESTAMP = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss-SSS");
     private static final By CREATE_ISSUE = By.xpath("//a[@data-test='createIssueButton']");
     private static final By SUMMARY = By.xpath("//textarea[@data-test='summary']");
     private static final By DESCRIPTION = By.xpath("//*[@data-test='wysiwyg-editor-content' and @contenteditable='true']");
     private static final By SUBMIT = By.xpath("//button[@data-test='submit-button' or ((normalize-space(.)='Create' or normalize-space(.)='Submit') and not(@data-test='ring-link'))]");
-    private static final By SEARCH = By.xpath("//input[@placeholder='Search for text or add a filter' or contains(@placeholder, 'Search') or contains(@aria-label, 'Search')]");
-    private static final String ISSUE_SUMMARY = "//*[contains(normalize-space(.), %s)]";
+    private static final By ISSUE_DIALOG = By.xpath("//div[@role='dialog' and @data-test='ring-island ring-dialog']");
+    private static final By ISSUE_DIALOG_SUMMARY = By.xpath("//div[@role='dialog' and @data-test='ring-island ring-dialog']//h1[@data-test='ticket-summary']");
+    private static final By SEARCH = By.xpath("//input[@data-test='ring-select__focus' and @placeholder='Search for text or add a filter']");
+    private static final String ISSUE_SUMMARY = "//td[@data-test='ring-table-cell summary']//a[normalize-space(.) = %s]";
 
     public IssuesPage(WebDriver driver) {
         super(driver);
@@ -20,10 +35,10 @@ public class IssuesPage extends BasePage {
 
     public void open(String baseUrl) {
         driver.get(baseUrl + "/issues");
-        wait.until(ExpectedConditions.presenceOfElementLocated(BODY));
+        wait.until(ExpectedConditions.presenceOfElementLocated(CREATE_ISSUE));
     }
 
-    public void createIssue(String projectKey, String summary, String description) {
+    public void createIssue(String summary, String description) {
         clickable(CREATE_ISSUE).click();
         visible(SUMMARY).sendKeys(summary);
         for (WebElement editor : driver.findElements(DESCRIPTION)) {
@@ -33,9 +48,34 @@ public class IssuesPage extends BasePage {
             }
         }
         clickable(SUBMIT).click();
-        wait.until(ExpectedConditions.or(
-                ExpectedConditions.urlContains(projectKey + "-"),
-                ExpectedConditions.invisibilityOfElementLocated(SUMMARY)));
+        visible(ISSUE_DIALOG);
+        wait.until(ExpectedConditions.textToBePresentInElementLocated(ISSUE_DIALOG_SUMMARY, summary));
+        saveCreatedIssueScreenshot(summary);
+    }
+
+    private void saveCreatedIssueScreenshot(String summary) {
+        if (!(driver instanceof TakesScreenshot screenshotDriver)) {
+            return;
+        }
+
+        Path directory = Path.of("target", "screenshots");
+        String safeSummary = summary.replaceAll("[^a-zA-Z0-9_-]", "_");
+        Path target = directory.resolve("issue-created-" + safeSummary + "-"
+                + LocalDateTime.now().format(SCREENSHOT_TIMESTAMP) + ".png");
+        try {
+            Files.createDirectories(directory);
+            Files.write(target, screenshotDriver.getScreenshotAs(OutputType.BYTES));
+            System.out.println("Created issue screenshot saved to " + target.toAbsolutePath());
+        } catch (IOException e) {
+            throw new UncheckedIOException("Could not save screenshot for created issue: " + summary, e);
+        }
+    }
+
+    public void refresh() {
+        driver.navigate().refresh();
+        wait.until(currentDriver -> "complete".equals(
+                ((JavascriptExecutor) currentDriver).executeScript("return document.readyState")));
+        visible(SEARCH);
     }
 
     public void search(String query) {
@@ -46,7 +86,10 @@ public class IssuesPage extends BasePage {
 
     public boolean showsIssue(String summary) {
         try {
-            return visible(By.xpath(ISSUE_SUMMARY.formatted(xpathLiteral(summary)))).isDisplayed();
+            return new WebDriverWait(driver, Duration.ofSeconds(25))
+                    .until(ExpectedConditions.visibilityOfElementLocated(
+                            By.xpath(ISSUE_SUMMARY.formatted(xpathLiteral(summary)))))
+                    .isDisplayed();
         } catch (org.openqa.selenium.TimeoutException ignored) {
             return false;
         }
