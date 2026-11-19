@@ -3,19 +3,12 @@ package ru.selenium.youtrack.pages;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class IssuesPage extends BasePage {
@@ -50,25 +43,6 @@ public class IssuesPage extends BasePage {
         clickable(SUBMIT).click();
         visible(ISSUE_DIALOG);
         wait.until(ExpectedConditions.textToBePresentInElementLocated(ISSUE_DIALOG_SUMMARY, summary));
-        saveCreatedIssueScreenshot(summary);
-    }
-
-    private void saveCreatedIssueScreenshot(String summary) {
-        if (!(driver instanceof TakesScreenshot screenshotDriver)) {
-            return;
-        }
-
-        Path directory = Path.of("target", "screenshots");
-        String safeSummary = summary.replaceAll("[^a-zA-Z0-9_-]", "_");
-        Path target = directory.resolve("issue-created-" + safeSummary + "-"
-                + LocalDateTime.now().format(SCREENSHOT_TIMESTAMP) + ".png");
-        try {
-            Files.createDirectories(directory);
-            Files.write(target, screenshotDriver.getScreenshotAs(OutputType.BYTES));
-            System.out.println("Created issue screenshot saved to " + target.toAbsolutePath());
-        } catch (IOException e) {
-            throw new UncheckedIOException("Could not save screenshot for created issue: " + summary, e);
-        }
     }
 
     public void refresh() {

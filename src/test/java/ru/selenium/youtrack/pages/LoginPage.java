@@ -1,7 +1,9 @@
 package ru.selenium.youtrack.pages;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 public class LoginPage extends BasePage {
     private static final By USERNAME = By.xpath("//input[@data-test='username-field']");
@@ -19,14 +21,22 @@ public class LoginPage extends BasePage {
     }
 
     public void login(String username, String password) {
-        var usernameField = visible(USERNAME);
-        usernameField.clear();
-        usernameField.sendKeys(username);
-
-        var passwordField = visible(PASSWORD);
-        passwordField.clear();
-        passwordField.sendKeys(password);
+        replaceValue(visible(USERNAME), username, "username");
+        replaceValue(visible(PASSWORD), password, "password");
         clickable(SUBMIT).click();
+    }
+
+    private void replaceValue(WebElement field, String value, String fieldName) {
+        field.click();
+        field.sendKeys(Keys.CONTROL, "a", Keys.BACK_SPACE);
+        field.sendKeys(value);
+
+        String actualValue = field.getDomProperty("value");
+        if (!value.equals(actualValue)) {
+            throw new IllegalStateException("The " + fieldName + " field did not retain the entered value"
+                    + " (expected length " + value.length() + ", actual length "
+                    + (actualValue == null ? 0 : actualValue.length()) + ")");
+        }
     }
 
     public boolean hasLoginError() {
