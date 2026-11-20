@@ -7,7 +7,6 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class HomePage extends BasePage {
     private static final By PROJECTS_CONTENT = By.xpath("//*[@data-test='project-list']");
-    private static final String PROJECT_NAME = "//*[@data-test='project' and @data-test-name = %s]";
 
     public HomePage(WebDriver driver) {
         super(driver);
@@ -30,7 +29,9 @@ public class HomePage extends BasePage {
 
     public boolean containsProject(String projectName) {
         try {
-            return visible(By.xpath(PROJECT_NAME.formatted(xpathLiteral(projectName)))).isDisplayed();
+            By project = By.xpath("//*[@data-test='project' and @data-test-name="
+                    + xpathLiteral(projectName) + "]");
+            return visible(project).isDisplayed();
         } catch (org.openqa.selenium.TimeoutException ignored) {
             return false;
         }

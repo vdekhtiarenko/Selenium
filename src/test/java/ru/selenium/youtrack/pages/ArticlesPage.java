@@ -5,12 +5,12 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class ArticlesPage extends BasePage {
-    private static final By NEW_ARTICLE = By.cssSelector("[data-test='articlesCreateButtonContainer']");
-    private static final By ARTICLE_FORM = By.cssSelector("form[data-test='form']");
-    private static final By TITLE = By.cssSelector("[data-test='summary']");
-    private static final By CONTENT = By.cssSelector("[data-test='wysiwyg-editor-content']");
-    private static final By PUBLISH = By.cssSelector("[data-test='publish-button']");
-    private static final By ARTICLE_TITLE = By.cssSelector("main h1");
+    private static final By NEW_ARTICLE = By.xpath("//*[@data-test='articlesCreateButtonContainer']");
+    private static final By ARTICLE_FORM = By.xpath("//form[@data-test='form']");
+    private static final By TITLE = By.xpath("//*[@data-test='summary']");
+    private static final By CONTENT = By.xpath("//*[@data-test='wysiwyg-editor-content']");
+    private static final By PUBLISH = By.xpath("//*[@data-test='publish-button']");
+    private static final By ARTICLE_TITLE = By.xpath("//main//h1");
 
     public ArticlesPage(WebDriver driver) {
         super(driver);
@@ -55,7 +55,7 @@ public class ArticlesPage extends BasePage {
     }
 
     private By sidebarArticleLink(String title) {
-        return By.cssSelector("[data-test='left-sidebar'] [data-test~='article-summary'][data-test-title='"
-                + title + "']");
+        return By.xpath("//*[@data-test='left-sidebar']//*[contains(concat(' ', normalize-space(@data-test), ' '), "
+                + "' article-summary ') and @data-test-title=" + xpathLiteral(title) + "]");
     }
 }
